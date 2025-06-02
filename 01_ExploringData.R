@@ -1,24 +1,37 @@
-# import data
-data <- read.csv("data/pulse_data.csv")
+# load required packages
+library(tidyverse)
+library(naniar)
 
-# exploring the data
-# 1. check the dimension of the data
-dim(data)
-ncol(data)
-nrow(data)
+# import the data
+raw_data <- read.csv("data/Thalassemia_QoL.csv")
 
-# 2. check the data structure
-str(data)
+# recode the data
+clean_data <- raw_data |>
+  mutate(Gender = case_when(
+    Gender == 1 ~ "Male",
+    Gender == 2 ~ "Female"
+  )) |>
+  mutate(Marital_Status = case_when(
+    Marital_Status == 1 ~ "Single",
+    Marital_Status == 2 ~ "Married"
+  )) |>
+  mutate(Type_of_Family = case_when(
+    Type_of_Family == 1 ~ "Nuclear",
+    Type_of_Family == 2 ~ "Joint",
+    Type_of_Family == 3 ~ "Broken"
+  )) |>
+  mutate(QOL_Status = case_when(
+    QOL_Score <= 50 ~ "Poor",
+    QOL_Score > 50 ~ "Good"
+  ))
 
-# 3. why data structure is so important
-# 1. Numerical summary (min, max, mean, median, Q1, Q2, Q3)
-# 2. Categorical summary (frequency, percentage)
-summary(data)
+# check missing values
+sum(is.na(clean_data))
+gg_miss_var(clean_data)
 
-# 4. convert the data structure (as family)
-data$Gender <- as.factor(data$Gender)
-data$Smokes <- as.factor(data$Smokes)
-data$Alcohol <- as.factor(data$Alcohol)
-data$Exercise <- as.factor(data$Exercise)
-data$Ran <- as.factor(data$Ran)
+# drop missing values
+clean_data <- drop_na(clean_data)
+
+# export the clean data
+write.csv(clean_data, "data/Thalassemia_QoL_Clean.csv", row.names = FALSE)
 
